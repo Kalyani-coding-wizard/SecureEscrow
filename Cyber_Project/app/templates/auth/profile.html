@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">
+            <i class="bi bi-person-circle text-primary me-2"></i>
+            My Profile
+        </h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Account Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Username</label>
+                            <p class="fs-5 mb-0">{{ user.username }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Email</label>
+                            <p class="fs-5 mb-0">{{ user.email }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Role</label>
+                            <p class="mb-0">
+                                <span
+                                    class="badge bg-{{ 'danger' if user.is_admin() else 'primary' if user.can_initiate() else 'secondary' }} fs-6">
+                                    {{ user.role|capitalize }}
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="form-label text-muted">Member Since</label>
+                            <p class="mb-0">{{ user.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-key me-2"></i>Cryptographic Keys</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Key Type</label>
+                            <p class="mb-0 crypto-badge">RSA-2048</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Public Key Status</label>
+                            <p class="mb-0 text-success">
+                                <i class="bi bi-check-circle me-1"></i>Registered
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Private Key Status</label>
+                            <p class="mb-0 text-info">
+                                <i class="bi bi-lock-fill me-1"></i>Encrypted with your password
+                            </p>
+                        </div>
+                        <hr>
+                        <div>
+                            <label class="form-label text-muted">Your Public Key (PEM)</label>
+                            <div class="position-relative">
+                                <textarea class="form-control font-monospace" rows="6" readonly
+                                    style="font-size: 0.7rem;">{{ user.public_key }}</textarea>
+                            </div>
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                This key is used by others to verify your digital signatures
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MFA Security Section -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Two-Factor Authentication (MFA)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.mfa_enabled %}
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <strong>MFA is enabled!</strong> Your account has an extra layer of security.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>MFA Method</h6>
+                                <p class="crypto-badge">TOTP (Time-based OTP)</p>
+                                <ul class="small text-muted">
+                                    <li>Algorithm: HMAC-SHA1</li>
+                                    <li>Digits: 6</li>
+                                    <li>Time Step: 30 seconds</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Actions</h6>
+                                <form method="POST" action="{{ url_for('mfa.disable') }}" class="mb-2">
+                                    <input type="password" name="password" class="form-control mb-2"
+                                        placeholder="Enter password to disable" required>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-shield-x me-1"></i>Disable MFA
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>MFA not enabled.</strong> Protect your account with two-factor authentication.
+                        </div>
+                        <p class="text-muted">
+                            Two-factor authentication adds an extra layer of security by requiring a verification
+                            code from your phone in addition to your password.
+                        </p>
+                        <a href="{{ url_for('mfa.setup') }}" class="btn btn-primary">
+                            <i class="bi bi-shield-plus me-2"></i>Enable MFA
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Activity Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ user.contracts.count() }}</div>
+                                    <div class="stat-label">Contracts Created</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ user.signatures.count() }}</div>
+                                    <div class="stat-label">Documents Signed</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card">
+                                    <div class="stat-value">{{ user.signatures.filter_by(verified=True).count() }}</div>
+                                    <div class="stat-label">Verified Signatures</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endblock %}

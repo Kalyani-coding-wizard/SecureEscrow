@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Signatures - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-4">
+            <i class="bi bi-shield-check text-info me-2"></i>
+            Signature Verification
+        </h2>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                    {{ contract.original_filename }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Document Hash (SHA-256):</strong>
+                </p>
+                <code class="d-block p-2 bg-dark rounded mb-3">{{ contract.file_hash }}</code>
+                <p class="text-muted mb-0">
+                    All signatures are verified against this hash using each signer's RSA public key.
+                </p>
+            </div>
+        </div>
+
+        <!-- Verification Results -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Verification Results</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if results %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Signer</th>
+                                <th>Timestamp</th>
+                                <th>Verification Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td>
+                                    <i class="bi bi-person me-2"></i>
+                                    {{ result.signer.username }}
+                                    <span class="badge bg-secondary">{{ result.signer.role }}</span>
+                                </td>
+                                <td>
+                                    <small>{{ result.signature.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                </td>
+                                <td>
+                                    {% if result.is_valid %}
+                                    <span class="signature-status verified">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <strong>VALID</strong>
+                                    </span>
+                                    {% else %}
+                                    <span class="signature-status text-danger">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        <strong>INVALID</strong>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-pen fs-1 mb-3 d-block"></i>
+                    <p>No signatures to verify yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Summary -->
+        {% if results %}
+        <div
+            class="alert {{ 'alert-success' if results|selectattr('is_valid')|list|length == results|length else 'alert-warning' }} mt-4">
+            <i
+                class="bi bi-{{ 'check-circle' if results|selectattr('is_valid')|list|length == results|length else 'exclamation-triangle' }} me-2"></i>
+            <strong>{{ results|selectattr('is_valid')|list|length }}/{{ results|length }}</strong> signature(s) verified
+            successfully.
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('contracts.view', contract_id=contract.id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Contract
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

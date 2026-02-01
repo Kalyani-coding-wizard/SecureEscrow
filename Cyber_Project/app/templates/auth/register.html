@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Register - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-person-plus text-primary me-2"></i>
+                    Create Account
+                </h3>
+                <p class="text-muted mb-0 mt-2">Your cryptographic keys will be generated automatically</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" name="username"
+                                placeholder="Choose a username" required minlength="3"
+                                value="{{ request.form.get('username', '') }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control border-start-0" name="email"
+                                placeholder="your@email.com" required value="{{ request.form.get('email', '') }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0" name="password" id="password"
+                                placeholder="Create a strong password" required minlength="8">
+                        </div>
+
+                        <!-- NIST SP 800-63-2 Password Requirements -->
+                        <div class="mt-2 p-2 border rounded bg-dark">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-shield-check me-1"></i>Password Requirements (NIST SP 800-63-2):
+                            </small>
+                            <div class="row small">
+                                <div class="col-6">
+                                    <span id="req-length" class="text-muted">
+                                        <i class="bi bi-x-circle me-1"></i>Minimum 8 characters
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="req-upper" class="text-muted">
+                                        <i class="bi bi-x-circle me-1"></i>1 uppercase letter (A-Z)
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="req-lower" class="text-muted">
+                                        <i class="bi bi-x-circle me-1"></i>1 lowercase letter (a-z)
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="req-number" class="text-muted">
+                                        <i class="bi bi-x-circle me-1"></i>1 number (0-9)
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span id="req-special" class="text-muted">
+                                        <i class="bi bi-x-circle me-1"></i>1 special character (!@#$...)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Your password encrypts your private signing key
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0" name="confirm_password"
+                                placeholder="Repeat your password" required minlength="8">
+                        </div>
+                    </div>
+
+                    <!-- Role Selection for RBAC -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="bi bi-person-badge me-1"></i>Account Role
+                        </label>
+                        <select class="form-select" name="role" required>
+                            {% for role in roles %}
+                            <option value="{{ role }}" {% if role=='signatory' %}selected{% endif %}>
+                                {{ role.capitalize() }}
+                                {% if role == 'signatory' %} - Can sign contracts{% endif %}
+                                {% if role == 'initiator' %} - Can create & upload contracts{% endif %}
+                                {% if role == 'auditor' %} - Can view audit logs{% endif %}
+                                {% if role == 'admin' %} - Full system access{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-muted">
+                            <i class="bi bi-shield me-1"></i>Role determines your access permissions (RBAC)
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2">
+                        <i class="bi bi-key me-2"></i>
+                        <small>Upon registration, an RSA-2048 key pair will be generated for digital signatures.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-shield-check me-2"></i>Create Secure Account
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <span class="text-muted">Already have an account?</span>
+                <a href="{{ url_for('auth.login') }}" class="ms-1">Login here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real-time Password Validation Script -->
+<script>
+    document.getElementById('password').addEventListener('input', function () {
+        const password = this.value;
+
+        // Check each requirement
+        const requirements = [
+            { id: 'req-length', test: password.length >= 8 },
+            { id: 'req-upper', test: /[A-Z]/.test(password) },
+            { id: 'req-lower', test: /[a-z]/.test(password) },
+            { id: 'req-number', test: /\d/.test(password) },
+            { id: 'req-special', test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password) }
+        ];
+
+        requirements.forEach(req => {
+            const element = document.getElementById(req.id);
+            if (req.test) {
+                element.classList.remove('text-muted');
+                element.classList.add('text-success');
+                element.innerHTML = element.innerHTML.replace('bi-x-circle', 'bi-check-circle');
+            } else {
+                element.classList.remove('text-success');
+                element.classList.add('text-muted');
+                element.innerHTML = element.innerHTML.replace('bi-check-circle', 'bi-x-circle');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - SecureEscrow{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+    <i class="bi bi-bar-chart text-primary me-2"></i>
+    System Statistics
+</h2>
+
+<!-- Main Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value text-success">{{ stats.active_users }}</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value">{{ stats.total_contracts }}</div>
+            <div class="stat-label">Total Contracts</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value text-warning">{{ stats.pending_contracts }}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value text-info">{{ stats.partially_signed }}</div>
+            <div class="stat-label">Partially Signed</div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card stat-card">
+            <div class="stat-value text-success">{{ stats.finalized_contracts }}</div>
+            <div class="stat-label">Finalized</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <!-- Contract Status Overview -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Contract Status</h5>
+            </div>
+            <div class="card-body">
+                {% if stats.total_contracts > 0 %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Pending</span>
+                        <span>{{ stats.pending_contracts }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar status-pending"
+                            style="width: {{ (stats.pending_contracts / stats.total_contracts * 100)|int }}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Partially Signed</span>
+                        <span>{{ stats.partially_signed }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar status-partially-signed"
+                            style="width: {{ (stats.partially_signed / stats.total_contracts * 100)|int }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Finalized</span>
+                        <span>{{ stats.finalized_contracts }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar status-finalized"
+                            style="width: {{ (stats.finalized_contracts / stats.total_contracts * 100)|int }}%"></div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">No contracts yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <!-- Audit Log Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Audit Log Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Total Log Entries</span>
+                    <span class="badge bg-primary fs-5">{{ stats.total_audit_logs }}</span>
+                </div>
+                <hr>
+                <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-journal-text me-2"></i>View Full Audit Log
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h5>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+            {% for log in recent_logs %}
+            <div class="list-group-item bg-transparent audit-entry">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <span class="audit-action">{{ log.action }}</span>
+                        {% if log.user %}
+                        <span class="text-muted">by {{ log.user.username }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="audit-timestamp">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="list-group-item bg-transparent text-center text-muted py-4">
+                No recent activity
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

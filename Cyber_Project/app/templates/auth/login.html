@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-box-arrow-in-right text-primary me-2"></i>
+                    Welcome Back
+                </h3>
+                <p class="text-muted mb-0 mt-2">Sign in to access your escrow dashboard</p>
+            </div>
+            <div class="card-body p-4">
+                <!-- Rate Limit Lockout Alert -->
+                {% if lockout_seconds %}
+                <div class="alert alert-danger mb-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-shield-exclamation fs-3 me-3"></i>
+                        <div>
+                            <strong>Account Temporarily Locked</strong>
+                            <p class="mb-1 small">Too many failed login attempts.</p>
+                            <div id="lockout-timer" class="fs-5">
+                                <i class="bi bi-clock me-1"></i>
+                                <span id="lockout-countdown">{{ lockout_seconds }}</span>s remaining
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="POST" id="login-form">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" name="username"
+                                placeholder="Enter your username" required autofocus
+                                value="{{ request.form.get('username', '') }}" {% if lockout_seconds %}disabled{% endif
+                                %}>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0" name="password"
+                                placeholder="Enter your password" required {% if lockout_seconds %}disabled{% endif %}>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" name="remember" id="remember" {% if
+                            lockout_seconds %}disabled{% endif %}>
+                        <label class="form-check-label" for="remember">Remember me</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2" id="login-btn" {% if lockout_seconds
+                        %}disabled{% endif %}>
+                        <i class="bi bi-shield-lock me-2"></i>Secure Login
+                    </button>
+                </form>
+
+                <!-- Security info -->
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Max 5 login attempts. OTP verification required.
+                    </small>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                <span class="text-muted">Don't have an account?</span>
+                <a href="{{ url_for('auth.register') }}" class="ms-1">Register here</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if lockout_seconds %}
+<script>
+    // Lockout countdown timer
+    let lockoutRemaining = {{ lockout_seconds }};
+    const lockoutCountdown = document.getElementById('lockout-countdown');
+    const loginBtn = document.getElementById('login-btn');
+    const formInputs = document.querySelectorAll('#login-form input, #login-form button');
+
+    function updateLockoutTimer() {
+        if (lockoutRemaining > 0) {
+            lockoutRemaining--;
+            const minutes = Math.floor(lockoutRemaining / 60);
+            const seconds = lockoutRemaining % 60;
+
+            if (minutes > 0) {
+                lockoutCountdown.textContent = `${minutes}m ${seconds}`;
+            } else {
+                lockoutCountdown.textContent = lockoutRemaining;
+            }
+        } else {
+            // Unlock the form
+            document.querySelector('.alert-danger').remove();
+            formInputs.forEach(input => input.disabled = false);
+        }
+    }
+
+    setInterval(updateLockoutTimer, 1000);
+</script>
+{% endif %}
+{% endblock %}

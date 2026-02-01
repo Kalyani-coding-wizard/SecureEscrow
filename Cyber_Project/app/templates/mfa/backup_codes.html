@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Backup Codes - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header text-center py-4 bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="bi bi-check-circle me-2"></i>
+                    MFA Enabled Successfully!
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle me-2"></i>Save Your Backup Codes</h5>
+                    <p class="mb-0">
+                        These one-time codes can be used to access your account if you lose your authenticator device.
+                        <strong>Save them in a secure location!</strong>
+                    </p>
+                </div>
+
+                <div class="card bg-dark mb-4">
+                    <div class="card-body text-center">
+                        <div class="row row-cols-2 g-3">
+                            {% for code in backup_codes %}
+                            <div class="col">
+                                <code class="fs-5 user-select-all">{{ code }}</code>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <ul class="text-muted small">
+                    <li>Each code can only be used <strong>once</strong></li>
+                    <li>Store these codes in a password manager or print them</li>
+                    <li>You can regenerate codes from your profile (requires verification)</li>
+                </ul>
+
+                <a href="{{ url_for('auth.profile') }}" class="btn btn-primary w-100">
+                    <i class="bi bi-check-lg me-2"></i>I've Saved My Codes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

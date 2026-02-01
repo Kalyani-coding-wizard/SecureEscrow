@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contract.original_filename }} - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Contract Header -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                    {{ contract.original_filename }}
+                </h4>
+                {% if contract.status == 'pending' %}
+                <span class="badge status-pending fs-6">Pending</span>
+                {% elif contract.status == 'partially_signed' %}
+                <span class="badge status-partially-signed fs-6">Partially Signed</span>
+                {% else %}
+                <span class="badge status-finalized fs-6">Finalized</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong>Owner:</strong> {{ contract.owner.username }}
+                        </p>
+                        <p class="mb-2">
+                            <strong>Created:</strong> {{ contract.created_at.strftime('%B %d, %Y at %H:%M') }}
+                        </p>
+                        {% if contract.finalized_at %}
+                        <p class="mb-2">
+                            <strong>Finalized:</strong> {{ contract.finalized_at.strftime('%B %d, %Y at %H:%M') }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2">
+                            <strong>File Hash (SHA-256):</strong>
+                        </p>
+                        <code class="small text-break">{{ contract.file_hash }}</code>
+                    </div>
+                </div>
+                {% if contract.description %}
+                <hr>
+                <p class="mb-0">
+                    <strong>Description:</strong><br>
+                    {{ contract.description }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Signature Progress -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Signature Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="progress flex-grow-1" style="height: 20px;">
+                        <div class="progress-bar"
+                            style="width: {{ (contract.get_signature_count() / contract.get_required_count() * 100)|int if contract.get_required_count() > 0 else 0 }}%">
+                            {{ contract.get_signature_count() }}/{{ contract.get_required_count() }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-success"><i class="bi bi-check-circle me-2"></i>Signed</h6>
+                        <ul class="list-unstyled">
+                            {% for user in signed_users %}
+                            <li class="mb-2">
+                                <i class="bi bi-person-check text-success me-2"></i>
+                                {{ user.username }}
+                                <span class="badge bg-secondary">{{ user.role }}</span>
+                            </li>
+                            {% else %}
+                            <li class="text-muted">No signatures yet</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-warning"><i class="bi bi-hourglass-split me-2"></i>Pending</h6>
+                        <ul class="list-unstyled">
+                            {% for user in pending_users %}
+                            <li class="mb-2">
+                                <i class="bi bi-person text-warning me-2"></i>
+                                {{ user.username }}
+                                <span class="badge bg-secondary">{{ user.role }}</span>
+                            </li>
+                            {% else %}
+                            <li class="text-success">All signatures collected!</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Signers (Owner Only) -->
+        {% if contract.owner_id == current_user.id and contract.status != 'finalized' %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Add More Signers</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('contracts.add_signers', contract_id=contract.id) }}">
+                    <div class="row g-2">
+                        <div class="col">
+                            <select name="new_signers" class="form-select" multiple>
+                                {% for user in available_signers %}
+                                <option value="{{ user.id }}">{{ user.username }} ({{ user.role }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-plus-lg me-1"></i>Add
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Actions</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <!-- Preview Document -->
+                <a href="{{ url_for('signing.preview', contract_id=contract.id) }}" class="btn btn-outline-primary"
+                    target="_blank">
+                    <i class="bi bi-eye me-2"></i>Preview Document
+                </a>
+
+                <!-- Sign (if eligible) -->
+                {% if can_sign %}
+                <a href="{{ url_for('signing.sign', contract_id=contract.id) }}" class="btn btn-warning">
+                    <i class="bi bi-pen me-2"></i>Sign This Document
+                </a>
+                {% endif %}
+
+                <!-- Verify Signatures -->
+                <a href="{{ url_for('signing.verify', contract_id=contract.id) }}" class="btn btn-outline-info">
+                    <i class="bi bi-shield-check me-2"></i>Verify All Signatures
+                </a>
+
+                <!-- Download (if finalized) -->
+                {% if contract.status == 'finalized' %}
+                <a href="{{ url_for('contracts.download', contract_id=contract.id) }}" class="btn btn-success">
+                    <i class="bi bi-download me-2"></i>Download Document
+                </a>
+                {% else %}
+                <button class="btn btn-secondary" disabled>
+                    <i class="bi bi-lock me-2"></i>In Escrow - Cannot Download
+                </button>
+                {% endif %}
+
+                <hr>
+
+                <a href="{{ url_for('contracts.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Crypto Info -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Security Info</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-lock-fill text-success me-2"></i>
+                    <small>AES-256 Encrypted</small>
+                </div>
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-hash text-info me-2"></i>
+                    <small>SHA-256 Integrity Hash</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-pen-fill text-warning me-2"></i>
+                    <small>RSA-2048 Signatures</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

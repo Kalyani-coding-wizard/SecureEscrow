@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}About - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="mb-4">
+            <i class="bi bi-info-circle text-primary me-2"></i>
+            About SecureEscrow
+        </h1>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Our Mission</h4>
+                <p>
+                    SecureEscrow is a secure, trustless digital escrow platform designed to facilitate
+                    multiparty contract execution without requiring blind trust between participants
+                    or the system administrators.
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Zero-Knowledge Architecture</h4>
+                <p>
+                    Functioning as a cryptographic intermediary, the application enforces a strict
+                    Zero-Knowledge architecture where legal documents are encrypted (using AES-256)
+                    immediately upon ingestion, ensuring that even system administrators cannot
+                    access sensitive contents.
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Conditional Release</h4>
+                <p>
+                    The core logic relies on a 'Conditional Release' workflow: contracts remain
+                    in a locked 'Escrow Hold' state until specific cryptographic criteria—namely,
+                    valid digital signatures (RSA) from all verified entities—are met.
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4>Security Features</h4>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>AES-256 Encryption</strong> - Military-grade file encryption
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>RSA Digital Signatures</strong> - 2048-bit asymmetric cryptography
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>SHA-256 Hashing</strong> - Document integrity verification
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>Bcrypt Password Hashing</strong> - Secure credential storage
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>Role-Based Access Control</strong> - Initiators, Signatories, Auditors
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>Immutable Audit Trail</strong> - Timestamped, non-repudiable logs
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

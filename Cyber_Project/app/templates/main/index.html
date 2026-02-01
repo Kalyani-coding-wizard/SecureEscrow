@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}SecureEscrow - Zero-Knowledge Digital Escrow{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section fade-in">
+    <h1 class="hero-title">
+        <i class="bi bi-shield-lock-fill me-2"></i>
+        SecureEscrow
+    </h1>
+    <p class="hero-subtitle">
+        Trustless multiparty contract execution with zero-knowledge encryption.
+        Your documents are cryptographically secured—even we can't read them.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('contracts.dashboard') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-rocket-takeoff me-2"></i>Get Started
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Security Badges -->
+<section class="py-4 text-center">
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+        <span class="crypto-badge">
+            <i class="bi bi-lock-fill"></i>AES-256 Encryption
+        </span>
+        <span class="crypto-badge">
+            <i class="bi bi-pen-fill"></i>RSA Digital Signatures
+        </span>
+        <span class="crypto-badge">
+            <i class="bi bi-hash"></i>SHA-256 Integrity
+        </span>
+        <span class="crypto-badge">
+            <i class="bi bi-journal-check"></i>Immutable Audit Trail
+        </span>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="feature-icon">
+                    <i class="bi bi-incognito"></i>
+                </div>
+                <h4>Zero-Knowledge Architecture</h4>
+                <p class="text-muted">
+                    Documents are encrypted immediately upon upload using AES-256.
+                    Even system administrators cannot access your sensitive contents.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="feature-icon">
+                    <i class="bi bi-file-earmark-lock2"></i>
+                </div>
+                <h4>Conditional Release</h4>
+                <p class="text-muted">
+                    Contracts remain in escrow hold until all verified entities
+                    provide valid digital signatures (RSA/ECDSA).
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card feature-card h-100">
+                <div class="feature-icon">
+                    <i class="bi bi-fingerprint"></i>
+                </div>
+                <h4>Non-Repudiation</h4>
+                <p class="text-muted">
+                    Every action is cryptographically logged with timestamps.
+                    The final execution is mathematically verifiable and tamper-proof.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row">
+        <div class="col-md-3 text-center mb-4">
+            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px;">
+                <span class="text-white fw-bold fs-4">1</span>
+            </div>
+            <h5>Upload</h5>
+            <p class="text-muted small">Initiator uploads PDF contract. File is immediately encrypted.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px;">
+                <span class="text-white fw-bold fs-4">2</span>
+            </div>
+            <h5>Invite</h5>
+            <p class="text-muted small">Add required signatories. Each has their own RSA key pair.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px;">
+                <span class="text-white fw-bold fs-4">3</span>
+            </div>
+            <h5>Sign</h5>
+            <p class="text-muted small">Signatories review and digitally sign the document hash.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3"
+                style="width: 60px; height: 60px;">
+                <span class="text-white fw-bold fs-4">4</span>
+            </div>
+            <h5>Release</h5>
+            <p class="text-muted small">Once all sign, escrow releases. Download the verified bundle.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+{% if not current_user.is_authenticated %}
+<section class="py-5">
+    <div class="card text-center p-5" style="background: var(--primary-gradient);">
+        <h3 class="text-white mb-3">Ready to secure your contracts?</h3>
+        <p class="text-white-50 mb-4">Join the future of trustless document execution.</p>
+        <div>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Create Free Account
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

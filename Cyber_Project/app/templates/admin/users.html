@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - SecureEscrow{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+    <i class="bi bi-people text-primary me-2"></i>
+    User Management
+</h2>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><small class="text-muted">#{{ user.id }}</small></td>
+                        <td>
+                            <i class="bi bi-person me-2"></i>
+                            {{ user.username }}
+                            {% if user.id == current_user.id %}
+                            <span class="badge bg-info">You</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.update_role', user_id=user.id) }}"
+                                class="d-inline">
+                                <select name="role" class="form-select form-select-sm d-inline-block"
+                                    style="width: auto;" onchange="this.form.submit()" {{ 'disabled' if
+                                    user.id==current_user.id else '' }}>
+                                    <option value="signatory" {{ 'selected' if user.role=='signatory' else '' }}>
+                                        Signatory</option>
+                                    <option value="initiator" {{ 'selected' if user.role=='initiator' else '' }}>
+                                        Initiator</option>
+                                    <option value="auditor" {{ 'selected' if user.role=='auditor' else '' }}>Auditor
+                                    </option>
+                                    <option value="admin" {{ 'selected' if user.role=='admin' else '' }}>Admin</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ user.created_at.strftime('%Y-%m-%d') }}</small>
+                        </td>
+                        <td>
+                            {% if user.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('admin.toggle_active', user_id=user.id) }}"
+                                class="d-inline">
+                                <button type="submit"
+                                    class="btn btn-sm btn-outline-{{ 'danger' if user.is_active else 'success' }}">
+                                    {% if user.is_active %}
+                                    <i class="bi bi-person-x me-1"></i>Deactivate
+                                    {% else %}
+                                    <i class="bi bi-person-check me-1"></i>Activate
+                                    {% endif %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Role Legend -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Role Permissions</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <h6 class="text-secondary">Signatory</h6>
+                <ul class="small mb-0">
+                    <li>View assigned contracts</li>
+                    <li>Sign documents</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h6 class="text-primary">Initiator</h6>
+                <ul class="small mb-0">
+                    <li>All Signatory permissions</li>
+                    <li>Create new contracts</li>
+                    <li>Add signatories</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h6 class="text-info">Auditor</h6>
+                <ul class="small mb-0">
+                    <li>All Signatory permissions</li>
+                    <li>View audit logs</li>
+                    <li>Run integrity checks</li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h6 class="text-danger">Admin</h6>
+                <ul class="small mb-0">
+                    <li>All permissions</li>
+                    <li>Manage users</li>
+                    <li>Change roles</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

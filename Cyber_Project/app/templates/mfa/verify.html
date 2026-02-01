@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Verify MFA - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-shield-lock text-warning me-2"></i>
+                    Two-Factor Verification
+                </h3>
+                <p class="text-muted mb-0 mt-2">Hello, {{ username }}</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label class="form-label">Authentication Code</label>
+                        <input type="text" class="form-control form-control-lg text-center" name="code"
+                            placeholder="000000" maxlength="8" required autofocus
+                            style="letter-spacing: 0.3em; font-size: 1.5rem;">
+                        <div class="form-text">
+                            <i class="bi bi-phone me-1"></i>
+                            Enter the 6-digit code from your authenticator app
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-unlock me-2"></i>Verify
+                    </button>
+                </form>
+
+                <hr>
+
+                <div class="text-center">
+                    <small class="text-muted">
+                        <i class="bi bi-key me-1"></i>
+                        Lost your device? Use a backup code instead (8 characters)
+                    </small>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                <a href="{{ url_for('auth.login') }}" class="text-muted">
+                    <i class="bi bi-arrow-left me-1"></i>Back to login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

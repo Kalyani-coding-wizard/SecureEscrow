@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP - SecureEscrow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-envelope-check text-primary me-2"></i>
+                    OTP Verification
+                </h3>
+                <p class="text-muted mb-0 mt-2">Enter the code sent to your email</p>
+            </div>
+            <div class="card-body p-4">
+                <!-- Email display -->
+                <div class="alert alert-info py-2 mb-3">
+                    <i class="bi bi-envelope me-2"></i>
+                    <small>Code sent to: <strong>{{ email }}</strong></small>
+                </div>
+
+                <!-- Timer -->
+                <div class="text-center mb-3">
+                    <div id="timer-display"
+                        class="fs-4 {% if time_remaining > 10 %}text-success{% elif time_remaining > 0 %}text-warning{% else %}text-danger{% endif %}">
+                        <i class="bi bi-clock me-1"></i>
+                        <span id="countdown">{{ time_remaining }}</span>s remaining
+                    </div>
+                </div>
+
+                <form method="POST" id="otp-form">
+                    <input type="hidden" name="action" value="verify">
+                    <div class="mb-4">
+                        <label class="form-label">Enter 6-digit OTP</label>
+                        <input type="text" class="form-control form-control-lg text-center" name="otp" id="otp-input"
+                            placeholder="000000" maxlength="6" pattern="[0-9]{6}" required autofocus
+                            style="letter-spacing: 0.5em; font-size: 1.5rem;">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2" id="verify-btn">
+                        <i class="bi bi-check-circle me-2"></i>Verify OTP
+                    </button>
+                </form>
+
+                <hr>
+
+                <!-- Resend OTP -->
+                <form method="POST" class="text-center">
+                    <input type="hidden" name="action" value="resend">
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" id="resend-btn" {% if not can_resend
+                        %}disabled{% endif %}>
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        <span id="resend-text">
+                            {% if can_resend %}
+                            Resend OTP
+                            {% else %}
+                            Wait for timer to expire
+                            {% endif %}
+                        </span>
+                    </button>
+                </form>
+
+                <p class="text-muted small text-center mt-3 mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    OTP is valid for 60 seconds. Check the <strong>console</strong> for the code.
+                </p>
+            </div>
+            <div class="card-footer text-center py-3">
+                <a href="{{ url_for('auth.cancel_otp') }}" class="text-danger">
+                    <i class="bi bi-x-circle me-1"></i>Cancel and return to login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Countdown timer
+    let timeRemaining = {{ time_remaining }};
+    const countdownEl = document.getElementById('countdown');
+    const timerDisplay = document.getElementById('timer-display');
+    const resendBtn = document.getElementById('resend-btn');
+    const resendText = document.getElementById('resend-text');
+
+    function updateTimer() {
+        if (timeRemaining > 0) {
+            timeRemaining--;
+            countdownEl.textContent = timeRemaining;
+
+            if (timeRemaining <= 10) {
+                timerDisplay.classList.remove('text-success', 'text-warning');
+                timerDisplay.classList.add('text-danger');
+            } else if (timeRemaining <= 20) {
+                timerDisplay.classList.remove('text-success', 'text-danger');
+                timerDisplay.classList.add('text-warning');
+            }
+        } else {
+            timerDisplay.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>OTP Expired';
+            timerDisplay.classList.remove('text-success', 'text-warning');
+            timerDisplay.classList.add('text-danger');
+
+            // Enable resend button
+            resendBtn.disabled = false;
+            resendText.textContent = 'Resend OTP';
+        }
+    }
+
+    setInterval(updateTimer, 1000);
+</script>
+{% endblock %}
